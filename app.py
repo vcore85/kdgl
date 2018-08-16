@@ -11,6 +11,8 @@ bootstrap = Bootstrap(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
+app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
 
 @login_manager.user_loader
