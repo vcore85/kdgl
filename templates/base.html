@@ -1,0 +1,39 @@
+{% from 'bootstrap/nav.html' import render_nav_item %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>宽带用户管理系统</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    {{ bootstrap.load_css() }}
+</head>
+<body>
+<main class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                {{ render_nav_item('index', '概况', use_li=True) }}
+                {{ render_nav_item('customer', '客户管理', use_li=True) }}
+                {{ render_nav_item('product', '产品管理', use_li=True) }}
+                {{ render_nav_item('bill', '账单信息', use_li=True) }}
+                {{ render_nav_item('log', '操作日志', use_li=True) }}
+            </ul>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <footer class="text-center">
+        {% block footer %}
+            <small> &copy; 2018 <a href="http://sqauth.com" title="Written by L.N">L.N</a>
+            </small>
+        {% endblock %}
+    </footer>
+</main>
+
+{{ bootstrap.load_js() }}
+</body>
+</html>
