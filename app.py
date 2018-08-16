@@ -11,6 +11,7 @@ bootstrap = Bootstrap(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 db = SQLAlchemy(app)
@@ -26,6 +27,19 @@ class User(db.Model):
 
     def __repr__(self):
         return '<User %r>' % self.username
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        login_user(user)
+        flask.flash('Logged in successfully.')
+        next = flask.request.args.get('next')
+        if not is_safe_url(next):
+            return flask.abort(400)
+
+        return flask.redirect(next or flask.url_for('index'))
+return flask.render_template('login.html', form=form)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
