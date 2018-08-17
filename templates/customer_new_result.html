@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>已完成建立客户档案</h3>
+<p></p>
+	<div class="row">
+		<div class="col-md-3">
+            <p><label >客户名称：    </label>
+            {{ cus.name}}</p>
+           <p><label >客户地址：    </label>
+            {{ cus.address}}</p>
+            <p><label >联系电话：    </label>
+            {{ cus.tel}}</p>
+
+            <p>
+			    <a class="btn btn-primary btn-large" href="/customer_new">继续新建客户</a>
+                <a class="btn btn-primary btn-large" href="#">办理业务</a>
+			</p>
+        </div>
+    </div>
+
+{% endblock %}

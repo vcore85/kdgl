@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>新建客户档案</h3>
+<form  method="post">
+  <div class="form-group">
+    <label for="name">客户名称：</label>
+    <input type="text" class="form-control col-md-3" id="name" name="name" value="" required>
+        <div class="invalid-feedback">
+          请输入客户名称。
+        </div>
+  </div>
+  <div class="form-group">
+    <label for="address">地址：</label>
+    <input type="text" class="form-control col-md-3" id="address" name="address" required>
+      <div class="invalid-feedback">
+        请输入客户地址。
+      </div>
+  </div>
+  <div class="form-group">
+    <label for="tel">联系电话：</label>
+    <input type="text" class="form-control col-md-3" id="tel"  name="tel"  required>
+      <div class="invalid-feedback">
+        请输入客户的联系电话。
+      </div>
+  </div>
+
+  <button type="submit" class="btn btn-dark">完成</button>
+</form>
+{% endblock %}

@@ -1,15 +1,14 @@
-from flask import Flask, render_template, request,flash,redirect, render_template_string
-from flask_bootstrap import Bootstrap
-from flask_wtf import FlaskForm
+from flask import Flask, render_template, request, flash, redirect, render_template_string
 from wtforms import StringField, SubmitField, BooleanField, PasswordField
 from wtforms.validators import DataRequired, Length
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
 from flask_babel import Babel
+from model import User,Customer,Bill,Task,Product,Log
+from flask_wtf import FlaskForm
 
 app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
-bootstrap = Bootstrap(app)
 babel = Babel(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
@@ -26,20 +25,7 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'zh'
 db = SQLAlchemy(app)
 
 
-class User(db.Model, UserMixin):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
 
-    # User authentication information. The collation='NOCASE' is required
-    # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
-    username = db.Column(db.String(100, collation='NOCASE'), nullable=False, unique=True)
-    password = db.Column(db.String(255), nullable=False, server_default='')
-    email_confirmed_at = db.Column(db.DateTime())
-
-    # User information
-    first_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
-    last_name = db.Column(db.String(100, collation='NOCASE'), nullable=False, server_default='')
 
 user_manager = UserManager(app, db, User)
 
@@ -50,8 +36,34 @@ def index():
 
 @app.route('/customer', methods=['GET', 'POST'])
 @login_required
-def customer():
+def view_customer():
     return render_template('customer.html')
+
+class Form_customer_new(FlaskForm):
+    name = StringField('name', validators=[DataRequired()])
+    address = StringField('address', validators=[DataRequired()])
+    tel = StringField('tel', validators=[DataRequired()])
+
+@app.route('/customer_new', methods=['GET', 'POST'])
+@login_required
+def customer_new():
+    form = Form_customer_new()
+    if request.method == 'POST':
+        name = request.form['name']
+        print(request.form['name'])
+        print(request.form['address'])
+        print(request.form['tel'])
+        db.session.add(Customer(name=request.form['name'], address=request.form['address'], tel=request.form['tel']))
+        db.session.commit()
+        customer_n = Customer.query.filter_by(name=name).first_or_404()
+        print(customer_n)
+        return render_template('customer_new_result.html', cus=customer_n)
+    return render_template('customer_new.html', form=form)
+
+@app.route('/customer_search', methods=['GET', 'POST'])
+@login_required
+def customer_search():
+    return render_template('customer_search.html')
 
 @app.route('/product', methods=['GET', 'POST'])
 @login_required

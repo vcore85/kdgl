@@ -2,9 +2,12 @@
 
 {% block content %}
 {% from "flask_user/_macros.html" import render_field, render_checkbox_field, render_submit_field %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-7 col-md-6 col-lg-5 col-centered">
 <h1>登录</h1>
 
-<form action="" method="POST" class="form" role="form">
+<form action="" method="POST" class="form-signin" role="form">
     {{ form.hidden_tag() }}
 
     {# Username or Email field #}
@@ -17,8 +20,7 @@
             </div>
             <div class="col-xs-6 text-right">
                 {% if user_manager.USER_ENABLE_REGISTER and not user_manager.USER_REQUIRE_INVITATION %}
-                    <a href="{{ url_for('user.register') }}" tabindex='190'>
-                         注册</a>
+                    <a href="{{ url_for('user.register') }}" tabindex='190'>注册</a>
                 {% endif %}
             </div>
         </div>
@@ -61,5 +63,7 @@
     {# Submit button #}
     {{ render_submit_field(form.submit, tabindex=180) }}
 </form>
-
+        </div>
+    </div>
+</div>
 {% endblock %}
