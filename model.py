@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
 class Customer(db.Model):
 	__tablename__ = 'customer'
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(80), unique=True)
+	name = db.Column(db.String(80), nullable=False)
 	address = db.Column(db.String(200), nullable=True)
 	tel  = db.Column(db.String(30), nullable=True)
 	pppoename  = db.Column(db.String(20), nullable=True)

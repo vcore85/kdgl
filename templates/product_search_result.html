@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p></p>
+<h3>查询结果</h3>
+<p></p>
+<table class="table">
+  <thead class="thead-light">
+    <th >操作</th>
+    <th>产品名称</th>
+    <th>产品周期</th>
+    <th>单周期价格(元)</th>
+      <th>上行带宽</th>
+      <th>下行带宽</th>
+  </thead>
+    <tbody>
+      {% for row in result %}
+    <tr>
+        <td ><a role="button" class="btn btn-primary" href="{{ url_for('view_product', product_id=row.id )}}">修改</a></td>
+        <td >{{ row.name  }}</td>
+        <td>{{ usetime_convert(row.usetime) }}</td>
+        <td>{{ row.value }}</td>
+        <td>{{ row.upbandwidth }}</td>
+        <td>{{ row.downbandwidth }}</td>
+     </tr>
+   {% endfor %}
+    </tbody>
+
+</table>
+
+
+{% endblock %}

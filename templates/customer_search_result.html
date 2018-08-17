@@ -1,0 +1,28 @@
+{% extends 'customer_search.html' %}
+
+{% block content_result %}
+<p></p>
+<h3>查询结果</h3>
+<p></p>
+<table class="table">
+  <thead class="thead-light">
+    <th >操作</th>
+    <th>客户名称</th>
+    <th>联系电话</th>
+    <th>客户地址</th>
+  </thead>
+    <tbody>
+      {% for row in result %}
+    <tr>
+        <td ><a role="button" class="btn btn-primary" href="{{ url_for('view_customer', customer_id=row.id )}}">详细信息</a></td>
+        <td   style="cursor:pointer" onclick="location.href='{{ url_for('view_customer', customer_id=row.id )}}'" >{{ row.name  }}</td>
+        <td>{{ row.tel }}</td>
+        <td>{{ row.address }}</td>
+     </tr>
+   {% endfor %}
+    </tbody>
+
+</table>
+
+
+{% endblock %}
