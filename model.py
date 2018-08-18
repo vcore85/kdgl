@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
 from sqlalchemy import Column
+from datetime import datetime
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/manage?charset=utf8mb4'
@@ -26,23 +27,33 @@ class Customer(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(80), nullable=False)
 	address = db.Column(db.String(200), nullable=True)
-	tel  = db.Column(db.String(30), nullable=True)
-	pppoename  = db.Column(db.String(20), nullable=True)
+	tel = db.Column(db.String(30), nullable=True)
+	status = db.Column(db.String(30), nullable=True)
+	def __repr__(self):
+		return '<Customer %r>' % self.name
+
+class Subscriber(db.Model):
+	__tablename__ = 'subscriber'
+	id = db.Column(db.Integer, primary_key=True)
+	customerid = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+	onusn = db.Column(db.String(20), nullable=True)
+	pppoename = db.Column(db.String(20), nullable=False)
 	pppoepassword  = db.Column(db.String(20), nullable=True)
 	productid  = db.Column(db.Integer, nullable=True)
 	pppoeendtime  = db.Column(db.DateTime, nullable=True)
 	status  = db.Column(db.String(30), nullable=True)
 	def __repr__(self):
-		return '<Customer %r>' % self.name
+		return '<Subscriber %r>' % self.name
 
 class Bill(db.Model):
 	__tablename__ = 'bill'
 	id = db.Column(db.Integer, primary_key=True)
 	userid = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
 	customerid = db.Column(db.Integer, db.ForeignKey('customer.id'),nullable=False)
-	billtime  = db.Column(db.DateTime, nullable=True)
-	money  = db.Column(db.Integer, nullable=True)
-	productid  = db.Column(db.Integer, db.ForeignKey('product.id'),nullable=False)
+	billtime = db.Column(db.DateTime, default=datetime.now())
+	money = db.Column(db.Integer, nullable=True)
+	productid = db.Column(db.Integer, db.ForeignKey('product.id'),nullable=False)
+	productbuynum = db.Column(db.Integer, nullable=True)
 	def __repr__(self):
 		return '<Bill %r>' % self.money
 

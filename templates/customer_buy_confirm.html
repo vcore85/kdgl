@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <h3>受理确认</h3>
+<p></p>
+<form method="POST">
+<div class="row" mb-3>
+    <div class="col-md-6 mb-3">
+        <label >宽带产品：</label>{{ product.name}}
+    </div>
+        <div class="col-md-6 mb-3">
+        <label >订购周期：</label>{{ productbuynum}}
+    </div>
+    <div class="col-md-6 mb-3">
+        <label >PPPOE账号</label>{{ pppoename}}
+    </div>
+    <div class="col-md-6 mb-3">
+        <label >PPPOE密码</label>{{ pppoepassword}}
+    </div>
+    <div class="col-md-6 mb-3">
+        <label >光猫 SN 序列号</label>{{ onusn}}
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-6 mb-3">
+        <ul class="list-group">
+            <li class="list-group-item d-flex ">
+                <div class="col-md-5">
+                    <h6 >合计价格：</h6>
+                </div>
+                <div class="col-md-5">
+                <input id="total" name="total" class="text-right" value="{{total}}" readonly required>
+                    </div>
+                <div class="col-md-2">
+                  <span class="align-text-bottom">元</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+      <button type="submit" class="btn btn-primary">确认受理</button>
+</form>
+
+
+{% endblock %}

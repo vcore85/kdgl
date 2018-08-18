@@ -1,12 +1,13 @@
 # coding=utf-8
-from flask import Flask, render_template, request, flash, redirect, render_template_string
+from flask import Flask, render_template, request, flash, redirect, render_template_string, url_for
 from wtforms import StringField, SubmitField, BooleanField, PasswordField, SelectField
 from wtforms.validators import DataRequired, Length
 from flask_sqlalchemy import SQLAlchemy
-from flask_user import login_required, UserManager, UserMixin
+from flask_user import login_required, UserManager, UserMixin, current_user
 from flask_babel import Babel
-from model import User,Customer,Bill,Task,Product,Log
+from model import User, Customer, Bill, Task, Product, Log, Subscriber
 from flask_wtf import FlaskForm
+from datetime import datetime, date
 
 app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
@@ -99,6 +100,7 @@ def view_product(product_id):
         product_v.downbandwidth = request.form['downbandwidth']
         db.session.merge(product_v)
         db.session.commit()
+        flash(request.form['name']+u'  产品信息修改完成','success')
     return render_template('product_view.html', form=form, product=product_v)
 
 class ProductNewForm(FlaskForm):
@@ -125,6 +127,7 @@ def product_new():
             db.session.commit()
             product_n = Product.query.filter_by(name=form.data['name']).first()
             print(product_n)
+            flash(u'产品： '+form.data['name']+u'      完成创建，请继续添加产品', 'success')
         else:
             flash(u'产品： '+form.data['name']+u'      已存在,请修改产品名称后重新提交', 'error')
  #       return render_template('product_new_result.html', cus=customer_n)
@@ -134,7 +137,43 @@ def product_new():
 @login_required
 def product_search():
     results = Product.query.all()
-    return render_template('product_search_result.html',  result=results)
+    return render_template('product_search_result.html', result=results)
+
+@app.route('/customerbuy/<customer_id>', methods=['GET', 'POST'])
+@login_required
+def customerbuy(customer_id):
+    product = Product.query.all()
+    customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
+    print(url_for('product_search'))
+    if request.method == 'POST':
+        print(request.form['product_selected'])
+        print(request.form['productbuynum-'+request.form['product_selected']]+u'年')
+        print (request.form['pppoename'])
+        print (request.form['onusn'])
+        print(request.form['total'])
+        print (customer_id)
+        print(current_user.id)
+        pppoeendtime = date.today().replace(year=date.today().year + int(request.form['productbuynum-'+request.form['product_selected']]), day=date.today().day + 1)
+        print(pppoeendtime)
+        return redirect(url_for('customerbuyconfirm', customer_id=customer_id)+'?productid='+request.form['product_selected']+'&productbuynum='+request.form['productbuynum-'+request.form['product_selected']]+'&pppoename='+request.form['pppoename']+'&pppoepassword='+request.form['pppoepassword']+'&onusn='+request.form['onusn'])
+    return render_template('customer_buy.html', product=product, cus=customer_v)
+
+@app.route('/customerbuyconfirm/<customer_id>', methods=['GET', 'POST'])
+@login_required
+def customerbuyconfirm(customer_id):
+    product_c = Product.query.filter_by(id=request.args.get('productid')).first_or_404()
+    customer_c = Customer.query.filter_by(id=customer_id).first_or_404()
+    money = product_c.value*int(request.args.get('productbuynum'))
+    print(money)
+    if request.method == 'POST':
+        print('POST')
+        if request.args.get('pppoename') is not None and request.args.get('pppoepassword') is not None and request.args.get('productbuynum') is not None:
+            print(request.args.get('onusn'))
+            pppoeendtime = date.today().replace(year=date.today().year + int(request.args.get('productbuynum')), day=date.today().day + 1)
+            print(pppoeendtime)
+            db.session.add(Subscriber(customerid=customer_id, onusn=request.args.get('onusn'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), productid=product_c.id, pppoeendtime=pppoeendtime, status=1))
+            db.session.add(Bill(userid=current_user.id, customerid=customer_id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum'))))
+    return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
 
 @app.route('/bill', methods=['GET', 'POST'])
 @login_required

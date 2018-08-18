@@ -1,0 +1,79 @@
+{% extends 'customer_view.html' %}
+
+{% block content_ext %}
+
+    <h3>业务受理</h3>
+<p></p>
+<form method="post">
+<table class="table">
+  <thead class="thead-light">
+
+    <th>选择宽带产品</th>
+    <th>订购数量</th>
+    <th>产品周期</th>
+    <th>单周期价格(元)</th>
+
+  </thead>
+    <tbody>
+      {% for row in product %}
+    <tr>
+
+        <td ><label><input class="form-check-input" type="radio" name="product_selected" id="{{ row.id  }}" value="{{ row.id  }}" required>{{ row.name  }}</label></td>
+        <td ><select id="productbuynum-{{ row.id  }}" name="productbuynum-{{ row.id  }}" class="form-control" >
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      </select></td>
+        <td>{{ usetime_convert(row.usetime) }}</td>
+        <td>{{ row.value }}</td>
+     </tr>
+   {% endfor %}
+    </tbody>
+
+</table>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="pppoename">PPPOE账号</label>
+        <input type="text" class="form-control" id="pppoename" name="pppoename" value required>
+        <div class="invalid-feedback">
+            需要输入PPPOE拨号账号。
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="pppoepassword">PPPOE密码</label>
+        <input type="text" class="form-control" id="pppoepassword" name="pppoepassword" value required>
+        <div class="invalid-feedback">
+            需要输入PPPOE拨号密码。
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label for="onusn">光猫 SN 序列号</label>
+        <input type="text" class="form-control" id="onusn" name="onusn" value >
+        <div class="invalid-feedback">
+            需要输入光猫SN序列号。
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <ul class="list-group">
+            <li class="list-group-item d-flex ">
+                <div class="col-5  align-middle">
+                    <h6 class="my-0">合计价格：</h6>
+                </div>
+                <div class="col-5">
+                <input id="total" name="total" class="text-right" readonly required>
+                    </div>
+                <div class="col-2">
+                  <span class="align-text-bottom">元</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+      <button type="submit" class="btn btn-primary">下一步</button>
+</form>
+
+
+{% endblock %}
