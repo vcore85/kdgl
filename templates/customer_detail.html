@@ -1,0 +1,27 @@
+{% extends 'customer_view.html' %}
+
+{% block content_ext %}
+
+    <h3>宽带订购详情</h3>
+<p></p>
+
+<div class="row">
+        <div class="col-md-2 mb-3">宽带产品：</div>
+        <div class="col-md-4 mb-3">{{product_d.name}}</div>
+        <div class="col-md-2 mb-3">宽带产品订购周期：</div>
+        <div class="col-md-4 mb-3">{{bill_d.productbuynum}} {{usetime_convert(product_d.usetime)}}</div>
+        <div class="col-md-2 mb-3">宽带订购时间：</div>
+        <div class="col-md-4 mb-3">{{bill_d.billtime}}</div>
+        <div class="col-md-2 mb-3">宽带到期时间：</div>
+        <div class="col-md-4 mb-3">{{subscriber_d.pppoeendtime}}</div>
+        <div class="col-md-2 mb-3">PPPOE账号：</div>
+        <div class="col-md-4 mb-3">{{subscriber_d.pppoename}}</div>
+        <div class="col-md-2 mb-3">PPPOE密码：</div>
+        <div class="col-md-4 mb-3">{{subscriber_d.pppoepassword}}</div>
+        <div class="col-md-2 mb-3">光猫 SN 序列号：</div>
+        <div class="col-md-4 mb-3">{{subscriber_d.onusn}}</div>
+
+
+</div>
+
+{% endblock %}

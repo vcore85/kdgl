@@ -144,13 +144,11 @@ def product_search():
 def customerbuy(customer_id):
     product = Product.query.all()
     customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
-    print(url_for('product_search'))
     if request.method == 'POST':
         print(request.form['product_selected'])
         print(request.form['productbuynum-'+request.form['product_selected']]+u'年')
         print (request.form['pppoename'])
         print (request.form['onusn'])
-        print(request.form['total'])
         print (customer_id)
         print(current_user.id)
         pppoeendtime = date.today().replace(year=date.today().year + int(request.form['productbuynum-'+request.form['product_selected']]), day=date.today().day + 1)
@@ -171,9 +169,29 @@ def customerbuyconfirm(customer_id):
             print(request.args.get('onusn'))
             pppoeendtime = date.today().replace(year=date.today().year + int(request.args.get('productbuynum')), day=date.today().day + 1)
             print(pppoeendtime)
-            db.session.add(Subscriber(customerid=customer_id, onusn=request.args.get('onusn'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), productid=product_c.id, pppoeendtime=pppoeendtime, status=1))
-            db.session.add(Bill(userid=current_user.id, customerid=customer_id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum'))))
+            sub = Subscriber(customerid=customer_id, onusn=request.args.get('onusn'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), productid=product_c.id, pppoeendtime=pppoeendtime, status=1)
+            db.session.add(sub)
+            db.session.commit()
+            db.session.add(Bill(userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum'))))
+            db.session.commit()
+            return redirect(url_for('customerbuyconfirm', customer_id=customer_id))
     return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
+
+@app.route('/customer_detail/<customer_id>', methods=['GET', 'POST'])
+@login_required
+def customer_detail(customer_id):
+    customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
+    subscriber_d = Subscriber.query.filter_by(customerid=customer_id).first()
+    print(subscriber_d)
+    if subscriber_d is not None:
+        print('if' + subscriber_d)
+        product_d = Product.query.filter_by(id=subscriber_d.productid).first_or_404()
+        bill_d = Bill.query.filter_by(subscriberid=subscriber_d.id).first_or_404()
+        return render_template('customer_detail.html', cus=customer_v, product_d=product_d, subscriber_d=subscriber_d,
+                               bill_d=bill_d)
+    else:
+        flash(u'该客户未订购宽带产品','error')
+        return redirect(url_for('view_customer', customer_id=customer_id))
 
 @app.route('/bill', methods=['GET', 'POST'])
 @login_required
