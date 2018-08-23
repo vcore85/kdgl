@@ -43,7 +43,7 @@ class Subscriber(db.Model):
 	pppoeendtime  = db.Column(db.DateTime, nullable=True)
 	status  = db.Column(db.String(30), nullable=True)
 	def __repr__(self):
-		return '<Subscriber %r>' % self.name
+		return '<Subscriber %r>' % self.pppoename
 
 class Bill(db.Model):
 	__tablename__ = 'bill'
@@ -78,9 +78,9 @@ class Task(db.Model):
 	subscriberid = db.Column(db.Integer, db.ForeignKey('subscriber.id'), nullable=False)
 	billid = db.Column(db.Integer, db.ForeignKey('bill.id'),nullable=False)
 	productid = db.Column(db.Integer, db.ForeignKey('product.id'),nullable=False)
-	createtime  = db.Column(db.DateTime, nullable=True)
-	finishtime  = db.Column(db.DateTime, nullable=True)
-	status  = db.Column(db.Integer, nullable=True)
+	createtime = db.Column(db.DateTime, nullable=True)
+	finishtime = db.Column(db.DateTime, nullable=True)
+	status = db.Column(db.Integer, nullable=True)
 	def __repr__(self):
 		return '<Task %r>' % self.name
 

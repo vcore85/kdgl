@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>查询账务信息</h3>
+<p></p>
+<form method=post>
+
+<div class="row">
+        <div class="input-group date col-md-4" data-provide="datepicker-inline">账单开始日期：
+            <input type="text" name="starttime"  class="datepicker" data-date-format="yyyy/mm/dd">
+            <div class="input-group-addon">
+                <span class="glyphicon glyphicon-th"></span>
+            </div>
+        </div>
+        <div class="input-group date col-md-4" data-provide="datepicker">账单结束日期：
+            <input type="text" name="endtime" class="datepicker" data-date-format="yyyy/mm/dd">
+            <div class="input-group-addon">
+                <span class="glyphicon glyphicon-th"></span>
+            </div>
+        </div>
+
+    </div>
+
+      <input type=submit value=查询>
+
+
+</form>
+{% block content_result %}{% endblock %}
+{% endblock %}

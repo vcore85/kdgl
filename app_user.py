@@ -101,6 +101,7 @@ def view_product(product_id):
         db.session.merge(product_v)
         db.session.commit()
         flash(request.form['name']+u'  产品信息修改完成','success')
+        return redirect(url_for('product_search'))
     return render_template('product_view.html', form=form, product=product_v)
 
 class ProductNewForm(FlaskForm):
@@ -174,7 +175,8 @@ def customerbuyconfirm(customer_id):
             db.session.commit()
             db.session.add(Bill(userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum'))))
             db.session.commit()
-            return redirect(url_for('customerbuyconfirm', customer_id=customer_id))
+            db.session.add(Task())
+            return redirect(url_for('customer_detail', customer_id=customer_id))
     return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
 
 @app.route('/customer_detail/<customer_id>', methods=['GET', 'POST'])
@@ -182,9 +184,7 @@ def customerbuyconfirm(customer_id):
 def customer_detail(customer_id):
     customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
     subscriber_d = Subscriber.query.filter_by(customerid=customer_id).first()
-    print(subscriber_d)
     if subscriber_d is not None:
-        print('if' + subscriber_d)
         product_d = Product.query.filter_by(id=subscriber_d.productid).first_or_404()
         bill_d = Bill.query.filter_by(subscriberid=subscriber_d.id).first_or_404()
         return render_template('customer_detail.html', cus=customer_v, product_d=product_d, subscriber_d=subscriber_d,
@@ -193,10 +193,13 @@ def customer_detail(customer_id):
         flash(u'该客户未订购宽带产品','error')
         return redirect(url_for('view_customer', customer_id=customer_id))
 
-@app.route('/bill', methods=['GET', 'POST'])
+@app.route('/billsearch', methods=['GET', 'POST'])
 @login_required
-def bill():
-    return render_template('bill.html')
+def billsearch():
+    if request.method == 'POST':
+        print(request.form['starttime'])
+        print(request.form['endtime'])
+    return render_template('bill_search.html')
 
 @app.route('/log', methods=['GET', 'POST'])
 @login_required
