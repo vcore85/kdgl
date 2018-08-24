@@ -5,23 +5,28 @@
 <p></p>
 <form method=post>
 
-<div class="row">
-        <div class="input-group date col-md-4" data-provide="datepicker-inline">账单开始日期：
-            <input type="text" name="starttime"  class="datepicker" data-date-format="yyyy/mm/dd">
-            <div class="input-group-addon">
-                <span class="glyphicon glyphicon-th"></span>
-            </div>
-        </div>
-        <div class="input-group date col-md-4" data-provide="datepicker">账单结束日期：
-            <input type="text" name="endtime" class="datepicker" data-date-format="yyyy/mm/dd">
-            <div class="input-group-addon">
-                <span class="glyphicon glyphicon-th"></span>
-            </div>
-        </div>
+<div class="row  ">
 
+        <div class="input-daterange input-group col-md-10" id="datepicker">开始账期：
+        <input type="text" class="input-sm form-control" name="start" />
+        <span class="input-group-addon">结算账期：</span>
+        <input type="text" class="input-sm form-control" name="end" />
     </div>
 
-      <input type=submit value=查询>
+    <div class="col-md-2">      <input type=submit value=查询></div>
+<script type="text/javascript">
+
+    $('.input-daterange').datepicker({
+            language: "zh-CN",
+            autoclose: true,//选中之后自动隐藏日期选择框
+            clearBtn: true,//清除按钮
+            todayBtn: true,//今日按钮
+            format: "yyyy-mm-dd"
+    });
+</script>
+    </div>
+
+
 
 
 </form>

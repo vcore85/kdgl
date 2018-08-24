@@ -197,8 +197,8 @@ def customer_detail(customer_id):
 @login_required
 def billsearch():
     if request.method == 'POST':
-        print(request.form['starttime'])
-        print(request.form['endtime'])
+        print(request.form['start'])
+        print(request.form['end'])
     return render_template('bill_search.html')
 
 @app.route('/log', methods=['GET', 'POST'])
