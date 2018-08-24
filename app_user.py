@@ -173,9 +173,14 @@ def customerbuyconfirm(customer_id):
             sub = Subscriber(customerid=customer_id, onusn=request.args.get('onusn'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), productid=product_c.id, pppoeendtime=pppoeendtime, status=1)
             db.session.add(sub)
             db.session.commit()
-            db.session.add(Bill(userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum'))))
+            bill = Bill(userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum')))
+            db.session.add(bill)
             db.session.commit()
-            db.session.add(Task())
+            db.session.add(Task(name='add', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id, productid=product_c.id, status=0))
+            db.session.add(
+                Task(name='del', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id,
+                     productid=product_c.id, status=0, crontime=pppoeendtime))
+            db.session.commit()
             return redirect(url_for('customer_detail', customer_id=customer_id))
     return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
 
@@ -230,7 +235,41 @@ def billsearch():
 def log():
     return render_template('log.html')
 
+class tasksearchresult:
+    cus_name = str()
+    pdt_name = str()
+    task_name = str()
+    status = str()
+    createtime = str()
+    crontime = str()
+    finishtime = str()
+    user_name = str()
 
+@app.route('/tasksearch', methods=['GET', 'POST'])
+@login_required
+def tasksearch():
+    if request.method == 'POST':
+        start = datetime.strptime(request.form['start'],"%Y-%m-%d")
+        end = datetime.strptime(request.form['end'], "%Y-%m-%d")
+        tasks = Task.query.filter(Task.createtime >= start, Task.createtime <= (end+ timedelta(days=1)))
+        results = []
+        for t in tasks:
+            trs = tasksearchresult()
+            c = Customer.query.filter_by(id=t.customerid).first()
+            trs.cus_name = c.name
+            p = Product.query.filter_by(id=t.productid).first()
+            trs.pdt_name = p.name
+            u = User.query.filter_by(id=t.userid).first()
+            trs.user_name = u.username
+            trs.task_name = taskname_convert(t.name)
+            trs.status = taskstatus_convert(t.status)
+            trs.createtime = t.createtime
+            trs.finishtime = t.finishtime
+            trs.crontime = t.crontime
+            results.append(trs)
+        print(results)
+        return render_template('task_search.html', results=results, start=start.date(), end=end.date())
+    return render_template('task_search.html')
 
 @app.context_processor
 def utility_processor():
@@ -242,7 +281,15 @@ def utility_processor():
         elif usetime == 'day':
             usetime_c = u'日'
         return usetime_c
-    return dict(usetime_convert=usetime_convert)
+    def taskname_convert(name):
+        if name == 'add':
+            name_c = u'激活'
+        elif name == 'del':
+            name_c = u'停机'
+        else:
+            name_c = u'未知'
+        return name_c
+    return dict(usetime_convert=usetime_convert, taskname_convert=taskname_convert)
 
 def usetime_convert(usetime):
     if usetime == 'year':
@@ -252,6 +299,26 @@ def usetime_convert(usetime):
     elif usetime == 'day':
         usetime_c = u'日'
     return usetime_c
+
+def taskname_convert(name):
+    if name == 'add':
+        name_c = u'激活'
+    elif name == 'del':
+        name_c = u'停机'
+    else:
+        name_c = u'未知'
+    return name_c
+
+def taskstatus_convert(status):
+    if status == 0:
+        status_c = u'未执行'
+    elif status == 1:
+        status_c = u'执行成功'
+    elif status == 2:
+        status_c = u'执行失败'
+    else:
+        status_c = u'未知'
+    return status_c
 
 if __name__ == '__main__':
     app.run()

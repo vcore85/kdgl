@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>查询账务信息</h3>
+<p></p>
+<form method=post>
+
+<div class="row  ">
+
+        <div class="input-daterange input-group col-md-10" id="datepicker">任务创建起始时间：
+        <input type="text" class="input-sm form-control" name="start" required/>
+        <span class="input-group-addon">任务创建截止时间：</span>
+        <input type="text" class="input-sm form-control" name="end" required/>
+    </div>
+
+    <div class="col-md-2">      <input type=submit value=查询></div>
+<script type="text/javascript">
+
+    $('.input-daterange').datepicker({
+            language: "zh-CN",
+            autoclose: true,//选中之后自动隐藏日期选择框
+            clearBtn: true,//清除按钮
+            todayBtn: true,//今日按钮
+            format: "yyyy-mm-dd"
+    });
+</script>
+    </div>
+
+</form>
+<p></p>
+<h3>查询结果(范围：{{ start  }} 到 {{ end  }})</h3>
+<p></p>
+<table class="table">
+  <thead class="thead-light">
+    <th >客户名称</th>
+    <th>产品名称</th>
+    <th>任务名称</th>
+    <th>任务状态</th>
+    <th>创建时间</th>
+    <th>计划执行时间</th>
+    <th>完成时间</th>
+      <th>操作员</th>
+  </thead>
+    <tbody>
+      {% for row in results %}
+    <tr>
+        <td >{{ row.cus_name  }}</td>
+        <td >{{ row.pdt_name  }}</td>
+        <td>{{ row.task_name  }}</td>
+        <td>{{ row.status }}</td>
+        <td>{{ row.createtime }}</td>
+        <td>{{row.crontime}}</td>
+        <td>{{ row.finishtime }}</td>
+        <td>{{ row.user_name }}</td>
+     </tr>
+   {% endfor %}
+    </tbody>
+
+</table>
+{% block content_result %}{% endblock %}
+{% endblock %}

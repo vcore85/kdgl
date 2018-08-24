@@ -1,3 +1,4 @@
+# coding=utf-8
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin
@@ -72,15 +73,18 @@ class Product(db.Model):
 class Task(db.Model):
 	__tablename__ = 'task'
 	id = db.Column(db.Integer, primary_key=True)
+	#name add、del
 	name = db.Column(db.String(30), nullable=False)
 	userid = db.Column(db.Integer, db.ForeignKey('users.id'),nullable=False)
 	customerid = db.Column(db.Integer, db.ForeignKey('customer.id'),nullable=False)
 	subscriberid = db.Column(db.Integer, db.ForeignKey('subscriber.id'), nullable=False)
 	billid = db.Column(db.Integer, db.ForeignKey('bill.id'),nullable=False)
 	productid = db.Column(db.Integer, db.ForeignKey('product.id'),nullable=False)
-	createtime = db.Column(db.DateTime, nullable=True)
+	createtime = db.Column(db.DateTime, default=datetime.now())
+	crontime = db.Column(db.DateTime, default=datetime.now())
 	finishtime = db.Column(db.DateTime, nullable=True)
-	status = db.Column(db.Integer, nullable=True)
+	#status 0未执行、1执行成功、2执行失败
+	status = db.Column(db.Integer, default=0)
 	def __repr__(self):
 		return '<Task %r>' % self.name
 
