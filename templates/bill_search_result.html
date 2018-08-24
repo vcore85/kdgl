@@ -1,0 +1,32 @@
+{% extends 'bill_search.html' %}
+
+{% block content_result %}
+<p></p>
+<h3>查询结果(账期：{{ start  }} 到 {{ end  }})</h3>
+<p></p>
+<table class="table">
+  <thead class="thead-light">
+    <th >客户名称</th>
+    <th>产品名称</th>
+    <th>订购周期</th>
+    <th>付款金额</th>
+      <th>付款时间</th>
+      <th>操作员</th>
+  </thead>
+    <tbody>
+      {% for row in results %}
+    <tr>
+        <td >{{ row.cus_name  }}</td>
+        <td >{{ row.pdt_name  }}</td>
+        <td>{{ row.pdt_buynum  }}</td>
+        <td>{{ row.bill_money }}</td>
+        <td>{{ row.bill_time }}</td>
+        <td>{{ row.user_name }}</td>
+     </tr>
+   {% endfor %}
+    </tbody>
+
+</table>
+
+
+{% endblock %}

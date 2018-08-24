@@ -7,7 +7,7 @@ from flask_user import login_required, UserManager, UserMixin, current_user
 from flask_babel import Babel
 from model import User, Customer, Bill, Task, Product, Log, Subscriber
 from flask_wtf import FlaskForm
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
@@ -193,12 +193,36 @@ def customer_detail(customer_id):
         flash(u'该客户未订购宽带产品','error')
         return redirect(url_for('view_customer', customer_id=customer_id))
 
+class billsearchresult:
+    cus_name = str()
+    pdt_name = str()
+    pdt_buynum = str()
+    bill_money = int()
+    bill_time = str()
+    user_name = str()
+
 @app.route('/billsearch', methods=['GET', 'POST'])
 @login_required
 def billsearch():
     if request.method == 'POST':
-        print(request.form['start'])
-        print(request.form['end'])
+        start = datetime.strptime(request.form['start'],"%Y-%m-%d")
+        end = datetime.strptime(request.form['end'], "%Y-%m-%d")
+        bills = Bill.query.filter(Bill.billtime >= start, Bill.billtime <= (end+ timedelta(days=1)))
+        results = []
+        for b in bills:
+            bsr = billsearchresult()
+            c = Customer.query.filter_by(id=b.customerid).first()
+            bsr.cus_name = c.name
+            p = Product.query.filter_by(id=b.productid).first()
+            bsr.pdt_name = p.name
+            u = User.query.filter_by(id=b.userid).first()
+            bsr.user_name = u.username
+            bsr.pdt_buynum = str(b.productbuynum) + usetime_convert(p.usetime)
+            bsr.bill_money = b.money
+            bsr.bill_time = b.billtime
+            results.append(bsr)
+        print(results)
+        return render_template('bill_search_result.html',results=results, start=start.date(),end=end.date())
     return render_template('bill_search.html')
 
 @app.route('/log', methods=['GET', 'POST'])
@@ -220,6 +244,14 @@ def utility_processor():
         return usetime_c
     return dict(usetime_convert=usetime_convert)
 
+def usetime_convert(usetime):
+    if usetime == 'year':
+        usetime_c = u'年'
+    elif usetime == 'month':
+        usetime_c = u'月'
+    elif usetime == 'day':
+        usetime_c = u'日'
+    return usetime_c
 
 if __name__ == '__main__':
     app.run()
