@@ -8,14 +8,17 @@ from flask_babel import Babel
 from model import User, Customer, Bill, Task, Product, Log, Subscriber
 from flask_wtf import FlaskForm
 from datetime import datetime, date, timedelta
+#import pymysql
+#pymysql.install_as_MySQLdb()
 
 app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
 babel = Babel(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 app.config['USER_ENABLE_EMAIL'] = False
 app.config['USER_ENABLE_USERNAME'] = True
@@ -28,6 +31,7 @@ db = SQLAlchemy(app)
 
 user_manager = UserManager(app, db, User)
 
+
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
@@ -36,7 +40,7 @@ def index():
 @app.route('/customer/<customer_id>', methods=['GET', 'POST'])
 @login_required
 def view_customer(customer_id):
-    customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
+    customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
     return render_template('customer_view.html', cus=customer_v)
 
 class Form_customer_new(FlaskForm):
@@ -53,11 +57,11 @@ def customer_new():
         print(request.form['name'])
         print(request.form['address'])
         print(request.form['tel'])
-        db.session.add(Customer(name=request.form['name'], address=request.form['address'], tel=request.form['tel']))
-        db.session.commit()
-        customer_n = Customer.query.filter_by(name=name).first_or_404()
-        print(customer_n)
-        return render_template('customer_new_result.html', cus=customer_n)
+        c = Customer(name=request.form['name'], address=request.form['address'], tel=request.form['tel'])
+        db.session.add(c)
+        db.session.flush()
+        print(c.id)
+        return render_template('customer_new_result.html', cus=c)
     return render_template('customer_new.html', form=form)
 
 class CustoemrSearchForm(FlaskForm):
@@ -73,11 +77,14 @@ def customer_search():
     search = CustoemrSearchForm(request.form)
     if request.method == 'POST':
         if search.data['select'] == 'name':
-            results = Customer.query.filter(Customer.name.contains(search.data['search'])).all()
+            results = db.session.query(Customer).filter(Customer.name.contains(search.data['search'])).all()
+            #results = Customer.query.filter(Customer.name.contains(search.data['search'])).all()
         elif search.data['select'] == 'address':
-            results = Customer.query.filter(Customer.address.contains(search.data['search'])).all()
+            results = db.session.query(Customer).filter(Customer.address.contains(search.data['search'])).all()
+            #results = Customer.query.filter(Customer.address.contains(search.data['search'])).all()
         elif search.data['select'] == 'tel':
-            results = Customer.query.filter(Customer.tel.contains(search.data['search'])).all()
+            results = db.session.query(Customer).filter(Customer.tel.contains(search.data['search'])).all()
+            #results = Customer.query.filter(Customer.tel.contains(search.data['search'])).all()
         return render_template('customer_search_result.html', form=search, result=results)
     return render_template('customer_search.html', form=search)
 
@@ -90,7 +97,7 @@ def product():
 @login_required
 def view_product(product_id):
     form = ProductNewForm(request.form)
-    product_v = Product.query.filter_by(id=product_id).first()
+    product_v = db.session.query(Product).filter_by(id=product_id).first()
     if request.method == 'POST':
  #       product_v.name = request.form['name']
         product_v.usetime = request.form['usetime']
@@ -120,13 +127,13 @@ def product_new():
     form = ProductNewForm(request.form)
     if request.method == 'POST':
         name = form.data['name']
-        product_n_test = Product.query.filter_by(name=form.data['name']).first()
+        product_n_test = db.session.query(Product).filter_by(name=form.data['name']).first()
         print(product_n_test)
        # print(product_n_test)
         if product_n_test is None:
             db.session.add(Product(name=form.data['name'], usetime=form.data['usetime'], value=form.data['value'], upbandwidth=form.data['upbandwidth'], downbandwidth=form.data['downbandwidth']))
             db.session.commit()
-            product_n = Product.query.filter_by(name=form.data['name']).first()
+            product_n = db.session.query(Product).filter_by(name=form.data['name']).first()
             print(product_n)
             flash(u'产品： '+form.data['name']+u'      完成创建，请继续添加产品', 'success')
         else:
@@ -137,14 +144,14 @@ def product_new():
 @app.route('/product_search', methods=['GET', 'POST'])
 @login_required
 def product_search():
-    results = Product.query.all()
+    results = db.session.query(Product).all()
     return render_template('product_search_result.html', result=results)
 
 @app.route('/customerbuy/<customer_id>', methods=['GET', 'POST'])
 @login_required
 def customerbuy(customer_id):
     product = Product.query.all()
-    customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
+    customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
     if request.method == 'POST':
         print(request.form['product_selected'])
         print(request.form['productbuynum-'+request.form['product_selected']]+u'年')
@@ -160,8 +167,8 @@ def customerbuy(customer_id):
 @app.route('/customerbuyconfirm/<customer_id>', methods=['GET', 'POST'])
 @login_required
 def customerbuyconfirm(customer_id):
-    product_c = Product.query.filter_by(id=request.args.get('productid')).first_or_404()
-    customer_c = Customer.query.filter_by(id=customer_id).first_or_404()
+    product_c =  db.session.query(Product).filter_by(id=request.args.get('productid')).first_or_404()
+    customer_c = db.session.query(Customer).filter_by(id=customer_id).first_or_404()
     money = product_c.value*int(request.args.get('productbuynum'))
     print(money)
     if request.method == 'POST':
@@ -187,11 +194,11 @@ def customerbuyconfirm(customer_id):
 @app.route('/customer_detail/<customer_id>', methods=['GET', 'POST'])
 @login_required
 def customer_detail(customer_id):
-    customer_v = Customer.query.filter_by(id=customer_id).first_or_404()
-    subscriber_d = Subscriber.query.filter_by(customerid=customer_id).first()
+    customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
+    subscriber_d = db.session.query(Subscriber).filter_by(customerid=customer_id).first()
     if subscriber_d is not None:
-        product_d = Product.query.filter_by(id=subscriber_d.productid).first_or_404()
-        bill_d = Bill.query.filter_by(subscriberid=subscriber_d.id).first_or_404()
+        product_d = db.session.query(Product).filter_by(id=subscriber_d.productid).first_or_404()
+        bill_d = db.session.query(Bill).filter_by(subscriberid=subscriber_d.id).first_or_404()
         return render_template('customer_detail.html', cus=customer_v, product_d=product_d, subscriber_d=subscriber_d,
                                bill_d=bill_d)
     else:
@@ -212,15 +219,15 @@ def billsearch():
     if request.method == 'POST':
         start = datetime.strptime(request.form['start'],"%Y-%m-%d")
         end = datetime.strptime(request.form['end'], "%Y-%m-%d")
-        bills = Bill.query.filter(Bill.billtime >= start, Bill.billtime <= (end+ timedelta(days=1)))
+        bills = db.session.query(Bill).filter(Bill.billtime >= start, Bill.billtime <= (end+ timedelta(days=1)))
         results = []
         for b in bills:
             bsr = billsearchresult()
-            c = Customer.query.filter_by(id=b.customerid).first()
+            c = db.session.query(Customer).filter_by(id=b.customerid).first()
             bsr.cus_name = c.name
-            p = Product.query.filter_by(id=b.productid).first()
+            p = db.session.query(Product).filter_by(id=b.productid).first()
             bsr.pdt_name = p.name
-            u = User.query.filter_by(id=b.userid).first()
+            u = db.session.query(User).filter_by(id=b.userid).first()
             bsr.user_name = u.username
             bsr.pdt_buynum = str(b.productbuynum) + usetime_convert(p.usetime)
             bsr.bill_money = b.money
@@ -251,15 +258,15 @@ def tasksearch():
     if request.method == 'POST':
         start = datetime.strptime(request.form['start'],"%Y-%m-%d")
         end = datetime.strptime(request.form['end'], "%Y-%m-%d")
-        tasks = Task.query.filter(Task.createtime >= start, Task.createtime <= (end+ timedelta(days=1)))
+        tasks = db.session.query(Task).filter(Task.createtime >= start, Task.createtime <= (end+ timedelta(days=1)))
         results = []
         for t in tasks:
             trs = tasksearchresult()
-            c = Customer.query.filter_by(id=t.customerid).first()
+            c = db.session.query(Customer).filter_by(id=t.customerid).first()
             trs.cus_name = c.name
-            p = Product.query.filter_by(id=t.productid).first()
+            p = db.session.query(Product).filter_by(id=t.productid).first()
             trs.pdt_name = p.name
-            u = User.query.filter_by(id=t.userid).first()
+            u = db.session.query(User).filter_by(id=t.userid).first()
             trs.user_name = u.username
             trs.task_name = taskname_convert(t.name)
             trs.status = taskstatus_convert(t.status)
@@ -321,4 +328,4 @@ def taskstatus_convert(status):
     return status_c
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
