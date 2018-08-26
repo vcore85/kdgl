@@ -4,11 +4,14 @@
 <h3>查询客户信息</h3>
 <p></p>
 <form method=post>
-  <dl >
-    {{ form.select }}
-    {{ form.search }}
-      <input type=submit value=查询>
-  </dl>
+  <div class="row">
+<div class="col-md-3">查询类别：{{ form.select }}</div>
+  <div class="col-md-4">查询内容：{{ form.search }}</div>
+  <div class="col-md-3"><input type=submit value="查  询"></div>
+
+
+
+</div>
 
 </form>
 {% block content_result %}{% endblock %}

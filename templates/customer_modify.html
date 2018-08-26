@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>修改客户信息</h3>
+<form  method="post">
+  <div class="form-group">
+    <label for="name">客户名称：</label>
+    <input type="text" class="form-control col-md-3" id="name" name="name" value="{{cus.name}}" required>
+  </div>
+  <div class="form-group">
+    <label for="address">地址：</label>
+    <input type="text" class="form-control col-md-3" id="address" name="address" value="{{cus.address}}" required>
+  </div>
+  <div class="form-group">
+    <label for="tel">联系电话：</label>
+    <input type="text" class="form-control col-md-3" id="tel"  name="tel" value="{{cus.tel}}" required>
+  </div>
+  {% if sub %}
+  <div class="form-group">
+    <label for="pppoename">PPPOE 账号：</label>
+    <input type="text" class="form-control col-md-3" id="pppoename"  name="pppoename" value="{{sub.pppoename}}" required>
+  </div>
+  <div class="form-group">
+    <label for="pppoepassword">PPPOE 密码：</label>
+    <input type="text" class="form-control col-md-3" id="pppoepassword"  name="pppoepassword" value="{{sub.pppoepassword}}" required>
+  </div>
+  {% endif %}
+  <button type="submit" class="btn btn-primary">完成</button>
+</form>
+{% endblock %}

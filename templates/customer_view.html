@@ -3,8 +3,8 @@
 {% block content %}
 <h3>客户信息</h3>
 <p></p>
-	<div class="row">
-		<div class="col-md-3">
+	<div >
+
             <p><label >客户名称：    </label>
             {{ cus.name}}</p>
            <p><label >客户地址：    </label>
@@ -13,10 +13,12 @@
             {{ cus.tel}}</p>
 
             <p>
-			    <a class="btn btn-primary btn-large" href="/customer_detail/{{ cus.id }}">查询订购信息</a>
+                <a class="btn btn-primary btn-large" href="/customer/modify/{{ cus.id }}">修改客户信息</a>
+                <a class="btn btn-primary btn-large" href="/customer_detail/{{ cus.id }}">查询宽带业务订购详情</a>
                 <a class="btn btn-primary btn-large" href="/customerbuy/{{ cus.id }}">办理业务</a>
 			</p>
-        </div>
+
     </div>
+
 {% block content_ext %}{% endblock %}
 {% endblock %}

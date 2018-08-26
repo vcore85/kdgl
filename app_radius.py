@@ -16,8 +16,8 @@ app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
 babel = Babel(app)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -43,6 +43,32 @@ def index():
 def view_customer(customer_id):
     customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
     return render_template('customer_view.html', cus=customer_v)
+
+@app.route('/customer/modify/<customer_id>', methods=['GET', 'POST'])
+@login_required
+def customer_m(customer_id):
+    cus = db.session.query(Customer).filter_by(id=customer_id).first()
+    sub = db.session.query(Subscriber).filter_by(customerid=cus.id).first()
+    if request.method == 'POST':
+        print(request.form['name'])
+        print(request.form['address'])
+        print(request.form['tel'])
+        cus.name =request.form['name']
+        cus.address = request.form['address']
+        cus.tel =request.form['tel']
+        db.session.merge(cus)
+        db.session.flush()
+        if sub is not None:
+            radc = db.session.query(Radcheck).filter_by(username=sub.pppoename).first()
+            sub.pppoename = request.form['pppoename']
+            sub.pppoepassword = request.form['pppoepassword']
+            db.session.merge(sub)
+            radc.username = request.form['pppoename']
+            radc.value = request.form['pppoepassword']
+            db.session.merge(radc)
+            db.session.flush()
+        return redirect(url_for('view_customer', customer_id=customer_id))
+    return render_template('customer_modify.html', cus=cus, sub=sub)
 
 class Form_customer_new(FlaskForm):
     name = StringField('name', validators=[DataRequired()])
@@ -107,9 +133,9 @@ def view_product(product_id):
         product_v.upbandwidth = request.form['upbandwidth']
         product_v.downbandwidth = request.form['downbandwidth']
         db.session.merge(product_v)
-        rad_pdt_up = db.session.query(Radgroupreply).filter_by(id=product_v.id, attribute='RP-Upstream-Speed-Limit').first()
+        rad_pdt_up = db.session.query(Radgroupreply).filter_by(name=product_v.id, attribute='RP-Upstream-Speed-Limit').first()
         rad_pdt_up.value = product_v.upbandwidth
-        rad_pdt_down = db.session.query(Radgroupreply).filter_by(id=product_v.id, attribute='RP-Downstream-Speed-Limit').first()
+        rad_pdt_down = db.session.query(Radgroupreply).filter_by(name=product_v.id, attribute='RP-Downstream-Speed-Limit').first()
         rad_pdt_down.value = product_v.downbandwidth
         db.session.merge(rad_pdt_up)
         db.session.merge(rad_pdt_down)
@@ -163,6 +189,11 @@ def product_search():
 def customerbuy(customer_id):
     product = db.session.query(Product).all()
     customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
+    if len(product) == 0:
+        flash(u'未找到可用的宽带产品，请先添加宽带产品，再办理业务!!!','error')
+        return redirect(url_for('product_new'))
+    else:
+        return render_template('customer_buy.html', product=product, cus=customer_v)
     if request.method == 'POST':
         print(request.form['product_selected'])
         print(request.form['productbuynum-'+request.form['product_selected']]+u'年')
@@ -173,7 +204,7 @@ def customerbuy(customer_id):
         pppoeendtime = date.today().replace(year=date.today().year + int(request.form['productbuynum-'+request.form['product_selected']]), day=date.today().day + 1)
         print(pppoeendtime)
         return redirect(url_for('customerbuyconfirm', customer_id=customer_id)+'?productid='+request.form['product_selected']+'&productbuynum='+request.form['productbuynum-'+request.form['product_selected']]+'&pppoename='+request.form['pppoename']+'&pppoepassword='+request.form['pppoepassword']+'&onusn='+request.form['onusn'])
-    return render_template('customer_buy.html', product=product, cus=customer_v)
+
 
 @app.route('/customerbuyconfirm/<customer_id>', methods=['GET', 'POST'])
 @login_required
