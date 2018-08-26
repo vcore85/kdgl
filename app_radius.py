@@ -141,7 +141,6 @@ def product_new():
             p = Product(name=form.data['name'], usetime=form.data['usetime'], value=form.data['value'], upbandwidth=form.data['upbandwidth'], downbandwidth=form.data['downbandwidth'])
             db.session.add(p)
             db.session.commit()
-            print('new product id : ' + p.id)
             db.session.add(Radgroupreply(groupname=p.id, attribute='RP-Upstream-Speed-Limit', value=p.upbandwidth))
             db.session.add(Radgroupreply(groupname=p.id, attribute='RP-Downstream-Speed-Limit', value=p.downbandwidth))
             db.session.commit()
@@ -195,12 +194,12 @@ def customerbuyconfirm(customer_id):
             bill = Bill(userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billtime=datetime.now(), money=money, productid=product_c.id, productbuynum=int(request.args.get('productbuynum')))
             db.session.add(bill)
             db.session.commit()
-            db.session.add(Task(name='add', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id, productid=product_c.id, status=0))
+            db.session.add(Radcheck(username=sub.pppoename, attribute='Cleartext-Password', op=':=', value=sub.pppoepassword))
+            db.session.add(Radusergroup(username=sub.pppoename, groupname=product_c.id))
+            db.session.add(Task(name='add', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id, productid=product_c.id, status=1))
             db.session.add(
                 Task(name='del', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id,
                      productid=product_c.id, status=0, crontime=pppoeendtime))
-            db.session.add(Radcheck(username=sub.pppoename,attribute='Cleartext-Password',op=':=',value=sub.pppoepassword))
-            db.session.add(Radusergroup(username=sub.pppoename, groupname=product_c.id))
             db.session.commit()
             return redirect(url_for('customer_detail', customer_id=customer_id))
     return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
