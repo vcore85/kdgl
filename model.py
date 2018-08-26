@@ -6,7 +6,7 @@ from sqlalchemy import Column
 from datetime import datetime
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/manage?charset=utf8mb4'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8mb4'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

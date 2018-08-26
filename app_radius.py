@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_user import login_required, UserManager, UserMixin, current_user
 from flask_babel import Babel
 from model import User, Customer, Bill, Task, Product, Log, Subscriber
+from model_radius import Radcheck, Radgroupreply, Radusergroup
 from flask_wtf import FlaskForm
 from datetime import datetime, date, timedelta
 #import pymysql
@@ -15,8 +16,8 @@ app = Flask(__name__)
 app.secret_key = 'vcore@qq.com'
 babel = Babel(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost:3306/radius?charset=utf8'
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
@@ -106,6 +107,12 @@ def view_product(product_id):
         product_v.upbandwidth = request.form['upbandwidth']
         product_v.downbandwidth = request.form['downbandwidth']
         db.session.merge(product_v)
+        rad_pdt_up = db.session.query(Radgroupreply).filter_by(id=product_v.id, attribute='RP-Upstream-Speed-Limit').first()
+        rad_pdt_up.value = product_v.upbandwidth
+        rad_pdt_down = db.session.query(Radgroupreply).filter_by(id=product_v.id, attribute='RP-Downstream-Speed-Limit').first()
+        rad_pdt_down.value = product_v.downbandwidth
+        db.session.merge(rad_pdt_up)
+        db.session.merge(rad_pdt_down)
         db.session.commit()
         flash(request.form['name']+u'  产品信息修改完成','success')
         return redirect(url_for('product_search'))
@@ -131,7 +138,12 @@ def product_new():
         print(product_n_test)
        # print(product_n_test)
         if product_n_test is None:
-            db.session.add(Product(name=form.data['name'], usetime=form.data['usetime'], value=form.data['value'], upbandwidth=form.data['upbandwidth'], downbandwidth=form.data['downbandwidth']))
+            p = Product(name=form.data['name'], usetime=form.data['usetime'], value=form.data['value'], upbandwidth=form.data['upbandwidth'], downbandwidth=form.data['downbandwidth'])
+            db.session.add(p)
+            db.session.commit()
+            print('new product id : ' + p.id)
+            db.session.add(Radgroupreply(groupname=p.id, attribute='RP-Upstream-Speed-Limit', value=p.upbandwidth))
+            db.session.add(Radgroupreply(groupname=p.id, attribute='RP-Downstream-Speed-Limit', value=p.downbandwidth))
             db.session.commit()
             product_n = db.session.query(Product).filter_by(name=form.data['name']).first()
             print(product_n)
@@ -187,6 +199,8 @@ def customerbuyconfirm(customer_id):
             db.session.add(
                 Task(name='del', userid=current_user.id, customerid=customer_id, subscriberid=sub.id, billid=bill.id,
                      productid=product_c.id, status=0, crontime=pppoeendtime))
+            db.session.add(Radcheck(username=sub.pppoename,attribute='Cleartext-Password',op=':=',value=sub.pppoepassword))
+            db.session.add(Radusergroup(username=sub.pppoename, groupname=product_c.id))
             db.session.commit()
             return redirect(url_for('customer_detail', customer_id=customer_id))
     return render_template('customer_buy_confirm.html', product=product_c, customer=customer_c, productbuynum=request.args.get('productbuynum'), pppoename=request.args.get('pppoename'), pppoepassword=request.args.get('pppoepassword'), onusn=request.args.get('onusn'), total=money)
