@@ -2,7 +2,7 @@
 
 {% block content_ext %}
 
-    <h3>宽带新装</h3>
+    <h3>宽带续费</h3>
 <p></p>
 <form method="post">
 <table class="table">
@@ -33,26 +33,15 @@
 </table>
 <div class="row">
     <div class="col-md-6 mb-3">
-        <label for="pppoename">PPPOE账号</label>
-        <input type="text" class="form-control" id="pppoename" name="pppoename" value required>
-        <div class="invalid-feedback">
-            需要输入PPPOE拨号账号。
-        </div>
+        PPPOE账号 ： {{sub_customer.pppoename}}
     </div>
     <div class="col-md-6 mb-3">
-        <label for="pppoepassword">PPPOE密码</label>
-        <input type="text" class="form-control" id="pppoepassword" name="pppoepassword" value required>
-        <div class="invalid-feedback">
-            需要输入PPPOE拨号密码。
-        </div>
+        PPPOE密码 ： {{sub_customer.pppoepassword}}
     </div>
     <div class="col-md-6 mb-3">
-        <label for="onusn">光猫 SN 序列号</label>
-        <input type="text" class="form-control" id="onusn" name="onusn" value >
-        <div class="invalid-feedback">
-            需要输入光猫SN序列号。
-        </div>
-    </div>
+        光猫 SN 码 ： {{sub_customer.onusn}}
+     </div>
+
 </div>
 
 

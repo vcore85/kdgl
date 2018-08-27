@@ -42,7 +42,8 @@ def index():
 @login_required
 def view_customer(customer_id):
     customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
-    return render_template('customer_view.html', cus=customer_v)
+    sub_customer = db.session.query(Subscriber).filter_by(customerid=customer_id).first()
+    return render_template('customer_view.html', cus=customer_v, sub_customer=sub_customer)
 
 @app.route('/customer/modify/<customer_id>', methods=['GET', 'POST'])
 @login_required
@@ -195,14 +196,22 @@ def customerbuy(customer_id):
     else:
         return render_template('customer_buy.html', product=product, cus=customer_v)
     if request.method == 'POST':
-        print(request.form['product_selected'])
-        print(request.form['productbuynum-'+request.form['product_selected']]+u'年')
-        print (request.form['pppoename'])
-        print (request.form['onusn'])
-        print (customer_id)
-        print(current_user.id)
         pppoeendtime = date.today().replace(year=date.today().year + int(request.form['productbuynum-'+request.form['product_selected']]), day=date.today().day + 1)
-        print(pppoeendtime)
+        return redirect(url_for('customerbuyconfirm', customer_id=customer_id)+'?productid='+request.form['product_selected']+'&productbuynum='+request.form['productbuynum-'+request.form['product_selected']]+'&pppoename='+request.form['pppoename']+'&pppoepassword='+request.form['pppoepassword']+'&onusn='+request.form['onusn'])
+
+@app.route('/customerbuynext/<customer_id>', methods=['GET', 'POST'])
+@login_required
+def customerbuynext(customer_id):
+    product = db.session.query(Product).all()
+    customer_v = db.session.query(Customer).filter_by(id=customer_id).first()
+    sub_customer = db.session.query(Subscriber).filter_by(customerid=customer_id).first()
+    if len(product) == 0:
+        flash(u'未找到可用的宽带产品，请先添加宽带产品，再办理业务!!!','error')
+        return redirect(url_for('product_new'))
+    else:
+        return render_template('customer_buy_next.html', product=product, cus=customer_v, sub_customer=sub_customer)
+    if request.method == 'POST':
+        pppoeendtime = date.today().replace(year=date.today().year + int(request.form['productbuynum-'+request.form['product_selected']]), day=date.today().day + 1)
         return redirect(url_for('customerbuyconfirm', customer_id=customer_id)+'?productid='+request.form['product_selected']+'&productbuynum='+request.form['productbuynum-'+request.form['product_selected']]+'&pppoename='+request.form['pppoename']+'&pppoepassword='+request.form['pppoepassword']+'&onusn='+request.form['onusn'])
 
 

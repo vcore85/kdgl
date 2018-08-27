@@ -3,22 +3,30 @@
 {% block content %}
 <h3>客户信息</h3>
 <p></p>
-	<div >
-
             <p><label >客户名称：    </label>
             {{ cus.name}}</p>
            <p><label >客户地址：    </label>
             {{ cus.address}}</p>
             <p><label >联系电话：    </label>
             {{ cus.tel}}</p>
+            <a class="btn btn-primary btn-large" href="/customer/modify/{{ cus.id }}">修改客户信息</a>
+            <a class="btn btn-primary btn-large" href="/customer_detail/{{ cus.id }}">查询宽带业务订购详情</a>
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">办理业务</button>
+            <div class="dropdown-menu">
+                {% if sub_customer %}
+                <a class="dropdown-item" href="/customerbuy/{{ cus.id }}">宽带新装</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item disabled" href="#">宽带续费</a>
+                {% else  %}
+                <a class="dropdown-item disabled" href="#"  >宽带新装</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/customerbuynext/{{ cus.id }}">宽带续费</a>
+                {% endif %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#">迁移</a>
+            </div>
+<p></p>
 
-            <p>
-                <a class="btn btn-primary btn-large" href="/customer/modify/{{ cus.id }}">修改客户信息</a>
-                <a class="btn btn-primary btn-large" href="/customer_detail/{{ cus.id }}">查询宽带业务订购详情</a>
-                <a class="btn btn-primary btn-large" href="/customerbuy/{{ cus.id }}">办理业务</a>
-			</p>
-
-    </div>
 
 {% block content_ext %}{% endblock %}
 {% endblock %}
